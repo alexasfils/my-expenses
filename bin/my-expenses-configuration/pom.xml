@@ -1,0 +1,95 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.alex.myexpenses</groupId>
+    <artifactId>my-expenses</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <artifactId>my-expenses-configuration</artifactId>
+  
+  <dependencies>
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.alex.myexpenses</groupId>
+			<artifactId>my-expenses-controller</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.alex.myexpenses</groupId>
+			<artifactId>my-expenses-service</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.alex.myexpenses</groupId>
+			<artifactId>my-expenses-entity</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.alex.myexpenses</groupId>
+			<artifactId>my-expenses-repository</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.alex.myexpenses</groupId>
+			<artifactId>my-expenses-common</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>de.dentrassi.crypto</groupId>
+			<artifactId>pem-keystore</artifactId>
+			<version>2.2.2</version>
+		</dependency>
+	
+	</dependencies>
+
+	<build>
+		<finalName>${parent.artifactId}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>create-fat-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<!-- add Main-Class to manifest file -->
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>
+										com.alex.myexpenses.MyExpensesApplication</mainClass>
+								</transformer>
+							</transformers>
+							<finalName>${parent.artifactId}</finalName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-maven-plugin</artifactId>
+				<version>4.17.2</version>
+				<configuration>
+					<propertyFile>src/main/resources/liquibase.properties</propertyFile>
+					<changeLogFile>
+						src/main/resources/db/changelog/db.changelog-master.xml</changeLogFile>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
