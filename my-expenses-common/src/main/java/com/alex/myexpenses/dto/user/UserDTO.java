@@ -2,20 +2,20 @@ package com.alex.myexpenses.dto.user;
 
 import java.time.LocalDate;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import javax.validation.constraints.NotNull;
 
-@Data
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
 @NoArgsConstructor
-public class UserDTO {
+public class UserDTO extends UserLiteDTO{
 	
-	private Long id;
-	private String name;
-	private String surname;
-	private String email;
+	@NotNull(message = "Password informations cannot be null")
 	private String password;
-	private String phone;
-	private String currency;
+	@NotNull(message = "Creation Date informations cannot be null")
 	private LocalDate creation_date;
 
 }

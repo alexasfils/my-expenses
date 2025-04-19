@@ -1,4 +1,4 @@
-package com.alex.myexpenses.configuration;
+package com.alex.myexpenses.dto.user;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +34,6 @@ public class UserPrincipal implements UserDetails{
 
 	@Override
 	public String getUsername() {
-		// TODO Auto-generated method stub
 		return user.getEmail();
 	}
 

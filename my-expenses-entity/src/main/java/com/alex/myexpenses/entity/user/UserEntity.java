@@ -36,17 +36,17 @@ public class UserEntity implements Serializable{
 	@Column(name = "id")
 	private Long id;
 
-	@Column(name = "name", nullable = false)
+	@Column(name = "name", length = 50, nullable = false)
 	private String name;
-	@Column(name = "surname", nullable = false)
+	@Column(name = "surname", length = 50, nullable = false)
 	private String surname;
-	@Column(name = "email", nullable = false)
+	@Column(name = "email",  length = 100, nullable = false)
 	private String email;
-	@Column(name = "password_hash", nullable = false)
+	@Column(name = "password_hash",  length = 255, nullable = false)
 	private String password;
-	@Column(name = "phone", nullable = false)
+	@Column(name = "phone", length = 20, nullable = false)
 	private String phone;
-	@Column(name = "currency", nullable = false)
+	@Column(name = "currency", length = 3, nullable = false)
 	private String currency;
 	@Column(name = "creation_date", nullable = false, updatable = false)
 	@CreationTimestamp

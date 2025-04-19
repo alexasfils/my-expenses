@@ -8,7 +8,6 @@
   <artifactId>my-expenses-service</artifactId>
   
   <dependencies>
-	
 	<dependency>
 		<groupId>com.alex.myexpenses</groupId>
 		<artifactId>my-expenses-repository</artifactId>
