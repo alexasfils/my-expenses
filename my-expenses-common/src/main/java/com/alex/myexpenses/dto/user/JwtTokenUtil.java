@@ -1,6 +1,5 @@
 package com.alex.myexpenses.dto.user;
 
-import java.util.Base64;
 import java.util.Date;
 
 import javax.annotation.PostConstruct;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 

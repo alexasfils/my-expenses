@@ -1,6 +1,5 @@
 package com.alex.myexpenses.entity.expenses;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -21,15 +20,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "expense_list")
+@Table(name = "category")
 @Data
 @NoArgsConstructor
-public class ExpenseListEntity implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 9060366669952128072L;
-
+public class CategoryEntity {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -38,19 +33,17 @@ public class ExpenseListEntity implements Serializable {
 	@Column(name = "name", length = 100, nullable = false)
 	private String name;
 	
-	@Column(name = "month", nullable = false, updatable = false)
-	private Integer month;
+	@Column(name = "color", length = 50)
+	private String color;
 	
-	@Column(name = "budget", nullable = false)
-	private Double budget;
+	@Column(name = "is_default", nullable = false)
+	private Boolean isdefault;
 	
-	@Column(name = "total_expense", nullable = false)
-	private Double totalExpense;
+	@OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<ExpenseEntity> expence;
 	
 	@ManyToOne
-    @JoinColumn(name = "id_user", nullable = false)
+	@JoinColumn(name = "id_user", nullable = true)
 	private UserEntity user;
-	
-	@OneToMany(mappedBy = "expenseList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<ExpenseEntity> expenses;
+
 }

@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 @Data
 @NoArgsConstructor
-public class UserEntity implements Serializable{
+public class UserEntity implements Serializable {
 	/**
 	 * 
 	 */
@@ -52,7 +52,7 @@ public class UserEntity implements Serializable{
 	@CreationTimestamp
 	private LocalDate creation_date;
 	
-//	@OneToMany(mappedBy = "property", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//	private List<ExpenseListEntity> expensesList;
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<ExpenseListEntity> expensesList;
 
 }

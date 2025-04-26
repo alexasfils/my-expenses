@@ -2,15 +2,17 @@ package com.alex.myexpenses.dto.user;
 
 import javax.validation.constraints.NotNull;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class UserLiteDTO {
 	
 	private Long id;
-	@NotNull(message = "NAme informations cannot be null")
+	@NotNull(message = "Name informations cannot be null")
 	private String name;
 	@NotNull(message = "Surname informations cannot be null")
 	private String surname;
