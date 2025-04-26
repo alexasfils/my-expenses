@@ -1,7 +1,7 @@
 CREATE TABLE Expenses (
 	id BIGINT AUTO_INCREMENT PRIMARY KEY,
 	name varchar(100) NOT NULL,
-	expence_date DATE NOT NULL,
+	expense_date DATE NOT NULL,
 	amount decimal(10,2) NOT NULL,
 	description TEXT,
 	id_expense_list BIGINT NOT NULL,
