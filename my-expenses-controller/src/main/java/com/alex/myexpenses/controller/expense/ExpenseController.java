@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alex.myexpenses.dto.expense.ExpenseDTO;
-import com.alex.myexpenses.dto.expense.ExpenseListDTO;
 import com.alex.myexpenses.interfaces.expense.IExpenseService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +49,7 @@ public class ExpenseController {
 	}
 	
 	@PutMapping("/udate")
-	public ResponseEntity<ExpenseDTO> updateUserExpenseList(@RequestBody ExpenseDTO expenseDTO){
+	public ResponseEntity<ExpenseDTO> updateUserExpense(@RequestBody ExpenseDTO expenseDTO){
 		return new ResponseEntity<ExpenseDTO>(expenseService.updateExpense(expenseDTO) , HttpStatus.OK);
 
 	}

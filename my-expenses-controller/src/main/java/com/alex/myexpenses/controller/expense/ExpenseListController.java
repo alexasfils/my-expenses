@@ -40,7 +40,7 @@ public class ExpenseListController {
 	
 	@DeleteMapping("/{expenseListId}")
 	public ResponseEntity<Boolean> deleteUserExpenseList(@PathVariable Long expenseListId) {
-		return ResponseEntity.ok(expenseListService.deleteUserExpenseListByidAndUserId(expenseListId));
+		return ResponseEntity.ok(expenseListService.deleteUserExpenseListByIdAndUserId(expenseListId));
 	}
 	
 	@PutMapping("/udate")

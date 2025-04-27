@@ -1,5 +1,6 @@
 package com.alex.myexpenses.dto.user;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
@@ -17,6 +18,7 @@ public class UserLiteDTO {
 	@NotNull(message = "Surname informations cannot be null")
 	private String surname;
 	@NotNull(message = "Email informations cannot be null")
+	@Email
 	private String email;
 	@NotNull(message = "Phone informations cannot be null")
 	private String phone;

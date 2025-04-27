@@ -19,8 +19,8 @@ public class CategoryDTO {
 	
 	private String color;
 	@NotNull(message = "Isdefault informations cannot be null")
-	private String isdefault;
-	private Long userId;
+	private Boolean isdefault = false;
+//	private Long userId;
 	
 	private List<ExpenseDTO> expence;
 

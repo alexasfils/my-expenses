@@ -12,15 +12,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.alex.myexpenses.dto.expense.ExpenseDTO;
 import com.alex.myexpenses.dto.expense.ExpenseListDTO;
 import com.alex.myexpenses.dto.user.UserPrincipal;
-import com.alex.myexpenses.entity.expenses.ExpenseEntity;
 import com.alex.myexpenses.entity.expenses.ExpenseListEntity;
 import com.alex.myexpenses.entity.user.UserEntity;
 import com.alex.myexpenses.interfaces.expense.IExpenseListService;
 import com.alex.myexpenses.repository.expense.ExpenseListRepository;
-import com.alex.myexpenses.repository.expense.ExpenseRepository;
 import com.alex.myexpenses.repository.user.UserRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +42,7 @@ public class ExpenseListService implements IExpenseListService{
 	        throw new RuntimeException("user is not Authenticated");
 	    }
 		 
-	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername(); // ← la tua email
+	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername();
 	    UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -63,7 +60,7 @@ public class ExpenseListService implements IExpenseListService{
 	    if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal)) {
 	        throw new RuntimeException("user is not Authenticated");
 	    }
-	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername(); // ← la tua email
+	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername();
 	    UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 	    
@@ -78,12 +75,12 @@ public class ExpenseListService implements IExpenseListService{
 
 	@Override
 	@Transactional
-	public Boolean deleteUserExpenseListByidAndUserId(Long id) {
+	public Boolean deleteUserExpenseListByIdAndUserId(Long id) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 	    if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal)) {
 	        throw new RuntimeException("user is not Authenticated");
 	    }
-	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername(); // ← la tua email
+	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername();
 	    UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 		
@@ -103,12 +100,12 @@ public class ExpenseListService implements IExpenseListService{
 	    if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal)) {
 	        throw new RuntimeException("user is not Authenticated");
 	    }
-	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername(); // ← la tua email
+	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername();
 	    UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 	    
 	    ExpenseListEntity list = expenseListRepository.findByIdAndUserId(expenseListDTO.getId(), user.getId())
-	    		.orElseThrow(() -> new EntityNotFoundException("Lista non trovata"));
+	    		.orElseThrow(() -> new EntityNotFoundException("UserExpenseList not found in database or not valid id or userId"));
 
 	    list.setName(expenseListDTO.getName());
 	    list.setMonth(expenseListDTO.getMonth());

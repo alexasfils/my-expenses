@@ -33,15 +33,14 @@ public class UserService implements IUserService {
 	private JwtTokenUtil jwtTokenUtil;
 	
 	@Override
-	public LoginResponseDTO login(String email, String rawPassword) {
+	public LoginResponseDTO login(String email, String password) {
 		
 		UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(
 				"USer not found for email and password: " + email));
 
-		if(!passwordEncoder.matches(rawPassword, userEntity.getPassword())) {
+		if(!passwordEncoder.matches(password, userEntity.getPassword())) {
 			 throw new BadCredentialsException("Invalid password");
 		}
-		System.out.println("Password e questa: " + userEntity.getPassword());
 		
 		UserDetails userDetails = new UserPrincipal(userEntity);
 	    String token = jwtTokenUtil.generateToken(userDetails);

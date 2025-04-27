@@ -48,7 +48,15 @@ public class ExpenseService implements IExpenseService{
 
 	@Override
 	public List<ExpenseDTO> getAllExpenseByExpenseListId(Long expenseListId) {
-		List<ExpenseEntity> expenseLists = expenseRepository.findByExpenseListId(expenseListId);
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal)) {
+	        throw new RuntimeException("user is not Authenticated");
+	    }
+	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername(); // ← la tua email
+	    UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+		
+		List<ExpenseEntity> expenseLists = expenseRepository.findByExpenseListIdAndExpenseListUserId(expenseListId, user.getId());
 		
 		return expenseLists.stream()
 				.map(x -> modelMapper.map(x, ExpenseDTO.class))

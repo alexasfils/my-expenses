@@ -10,7 +10,7 @@ public interface IExpenseListService {
 	
 	ExpenseListDTO save(ExpenseListDTO expenseListDTO);
 	
-	Boolean deleteUserExpenseListByidAndUserId(Long id);
+	Boolean deleteUserExpenseListByIdAndUserId(Long id);
 	
 	ExpenseListDTO updateUserExpenseListByIdAndUserId(ExpenseListDTO expenseListDTO);
 	
