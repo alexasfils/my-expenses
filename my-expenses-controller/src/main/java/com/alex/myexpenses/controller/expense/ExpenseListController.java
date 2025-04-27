@@ -43,7 +43,7 @@ public class ExpenseListController {
 		return ResponseEntity.ok(expenseListService.deleteUserExpenseListByidAndUserId(expenseListId));
 	}
 	
-	@PutMapping("udate/expenses")
+	@PutMapping("/udate")
 	public ResponseEntity<ExpenseListDTO> updateUserExpenseList(@RequestBody ExpenseListDTO expenseListDTO){
 		return new ResponseEntity<ExpenseListDTO>(expenseListService.updateUserExpenseListByIdAndUserId(expenseListDTO) , HttpStatus.OK);
 

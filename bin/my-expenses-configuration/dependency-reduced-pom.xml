@@ -56,6 +56,12 @@
     </dependency>
     <dependency>
       <groupId>com.alex.myexpenses</groupId>
+      <artifactId>my-expenses-controller</artifactId>
+      <version>1.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.alex.myexpenses</groupId>
       <artifactId>my-expenses-entity</artifactId>
       <version>1.0.0</version>
       <scope>provided</scope>
