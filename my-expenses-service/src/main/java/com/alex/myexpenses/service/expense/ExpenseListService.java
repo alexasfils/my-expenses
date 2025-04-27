@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.alex.myexpenses.dto.expense.ExpenseDTO;
 import com.alex.myexpenses.dto.expense.ExpenseListDTO;
 import com.alex.myexpenses.dto.user.UserPrincipal;
 import com.alex.myexpenses.entity.expenses.ExpenseEntity;
@@ -96,6 +97,27 @@ public class ExpenseListService implements IExpenseListService{
 	    log.info("UserExpenseList deleted: {}", id);
 		
 		return true;
+	}
+
+	@Override
+	@Transactional
+	public ExpenseListDTO updateUserExpenseListByIdAndUserId(ExpenseListDTO expenseListDTO) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal)) {
+	        throw new RuntimeException("Utente non autenticato");
+	    }
+	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername(); // ← la tua email
+	    UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+	    
+	    ExpenseListEntity list = expenseListRepository.findByIdAndUserId(expenseListDTO.getId(), user.getId())
+	    		.orElseThrow(() -> new EntityNotFoundException("Lista non trovata"));
+
+	    list.setName(expenseListDTO.getName());
+	    list.setMonth(expenseListDTO.getMonth());
+	    list.setBudget(expenseListDTO.getBudget());
+
+		return modelMapper.map(expenseListRepository.save(list), ExpenseListDTO.class);
 	}
 
 }

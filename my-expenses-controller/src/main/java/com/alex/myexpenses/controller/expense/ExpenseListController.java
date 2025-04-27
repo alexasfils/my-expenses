@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,6 +41,12 @@ public class ExpenseListController {
 	@DeleteMapping("/{expenseListId}")
 	public ResponseEntity<Boolean> deleteUserExpenseList(@PathVariable Long expenseListId) {
 		return ResponseEntity.ok(expenseListService.deleteUserExpenseListByidAndUserId(expenseListId));
+	}
+	
+	@PutMapping("udate/expenses")
+	public ResponseEntity<ExpenseListDTO> updateUserExpenseList(@RequestBody ExpenseListDTO expenseListDTO){
+		return new ResponseEntity<ExpenseListDTO>(expenseListService.updateUserExpenseListByIdAndUserId(expenseListDTO) , HttpStatus.OK);
+
 	}
 
 }

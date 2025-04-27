@@ -24,8 +24,8 @@ public class ExpenseListDTO {
 	private Double budget;
 	@NotNull(message = "TotalExpense cannot be null")
 	private Double totalExpense;
-//	@NotNull(message = "User Id cannot be null")
-//	private Long userId;
+	@NotNull(message = "User Id cannot be null")
+	private Long userId;
 	
 	private List<ExpenseDTO> expense;
 

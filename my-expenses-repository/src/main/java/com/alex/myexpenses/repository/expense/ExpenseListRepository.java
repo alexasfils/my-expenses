@@ -1,6 +1,7 @@
 package com.alex.myexpenses.repository.expense;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,4 +14,7 @@ public interface ExpenseListRepository extends JpaRepository<ExpenseListEntity, 
 	
 	@Modifying
 	Integer deleteByIdAndUserId(Long listId, Long userId);
+	
+	@Modifying
+	Optional<ExpenseListEntity> findByIdAndUserId(Long listId, Long userId);
 }

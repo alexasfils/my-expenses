@@ -12,4 +12,6 @@ public interface IExpenseListService {
 	
 	Boolean deleteUserExpenseListByidAndUserId(Long id);
 	
+	ExpenseListDTO updateUserExpenseListByIdAndUserId(ExpenseListDTO expenseListDTO);
+	
 }
