@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Escludi file compilati Java
+*.class
+
+# Escludi cartelle di build comuni
+/bin/
+/target/
+/build/

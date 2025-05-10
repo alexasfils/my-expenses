@@ -20,7 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "category")
+@Table(name = "categories")
 @Data
 @NoArgsConstructor
 public class CategoryEntity {
@@ -37,10 +37,10 @@ public class CategoryEntity {
 	private String color;
 	
 	@Column(name = "is_default", nullable = false)
-	private Boolean isdefault;
+	private Boolean isDefault;
 	
 	@OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<ExpenseEntity> expence;
+	private List<ExpenseEntity> expenses;
 	
 	@ManyToOne
 	@JoinColumn(name = "id_user", nullable = true)

@@ -22,6 +22,6 @@ public class CategoryDTO {
 	private Boolean isdefault = false;
 //	private Long userId;
 	
-	private List<ExpenseDTO> expence;
+	private List<ExpenseDTO> expenses;
 
 }

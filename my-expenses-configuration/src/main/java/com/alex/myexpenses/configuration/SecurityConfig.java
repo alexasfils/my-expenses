@@ -45,6 +45,8 @@ public class SecurityConfig {
 				    authz
 				        .requestMatchers(new AntPathRequestMatcher("/login")).permitAll();
 				    authz
+			        .requestMatchers(new AntPathRequestMatcher("/demo/**")).permitAll();
+				    authz
 				        .anyRequest().authenticated();
 				})
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

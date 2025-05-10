@@ -1,10 +1,12 @@
 package com.alex.myexpenses.service.expense;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,5 +115,29 @@ public class ExpenseListService implements IExpenseListService{
 
 		return modelMapper.map(expenseListRepository.save(list), ExpenseListDTO.class);
 	}
+
+	@Override
+	public ExpenseListDTO getExpenseListById(@NotNull Long id) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal)) {
+	        throw new RuntimeException("user is not Authenticated");
+	    }
+		 
+	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername();
+	    UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+		    ExpenseListEntity expenseList = expenseListRepository.findByIdAndUserId(id, user.getId()).orElseThrow(() -> new EntityNotFoundException("UserExpenseList not found in database or not valid id or userId"));;
+		
+		    return modelMapper.map(expenseList, ExpenseListDTO.class);
+	}
+
+//	@Override
+//	public List<ExpenseListDTO> getRandomExpenseListForDemo() {
+//		List<ExpenseListEntity> last30 = expenseListRepository.findTop30ByOrderByCreatedAtDesc();
+//		Collections.shuffle(last30);
+//		
+//		return last30.stream().limit(3).map(x -> modelMapper.map(x, ExpenseListDTO.class)).collect(Collectors.toList());
+//	}
 
 }

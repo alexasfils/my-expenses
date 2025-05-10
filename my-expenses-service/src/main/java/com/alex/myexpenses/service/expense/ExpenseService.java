@@ -67,7 +67,7 @@ public class ExpenseService implements IExpenseService{
 	@Transactional
 	public ExpenseDTO save(ExpenseDTO expenseDTO) {
 		//Find category
-		CategoryEntity categoryEntity = categoryRepository.findById(expenseDTO.getCategory().getId())
+		CategoryEntity categoryEntity = categoryRepository.findById(expenseDTO.getCategoryId())
 				.orElseThrow(() -> new EntityNotFoundException("Category not found with ID: " + expenseDTO.getExpenseListId()));
 		//Find expenseList
 		ExpenseListEntity expenseListEntity = expenseListRepository.findById(expenseDTO.getExpenseListId())
@@ -143,7 +143,7 @@ public class ExpenseService implements IExpenseService{
 	    UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 	    
-	    CategoryEntity category = categoryRepository.findById(expenseDTO.getCategory().getId())
+	    CategoryEntity category = categoryRepository.findById(expenseDTO.getCategoryId())
 	    		.orElseThrow(() -> new EntityNotFoundException("Category not found in database or not valid id "));
 	    
 	    ExpenseEntity expense = expenseRepository.findByIdAndExpenseListUserId(expenseDTO.getId(), user.getId())

@@ -33,6 +33,12 @@ public class ExpenseListController {
 		return new ResponseEntity<List<ExpenseListDTO>>(expenseListService.getAllUserExpenseList(), HttpStatus.OK);
 	}
 	
+	@GetMapping("/{expenseListId}")
+	public ResponseEntity<ExpenseListDTO> getExpenseListById(@PathVariable Long expenseListId){
+		
+		return new ResponseEntity<ExpenseListDTO>(expenseListService.getExpenseListById(expenseListId), HttpStatus.OK);
+	}
+	
 	@PostMapping
 	public ResponseEntity<ExpenseListDTO> createExpenseList(@RequestBody ExpenseListDTO expenseListDTO){
 		return new ResponseEntity<ExpenseListDTO>(expenseListService.save(expenseListDTO) , HttpStatus.CREATED);
@@ -46,7 +52,6 @@ public class ExpenseListController {
 	@PutMapping("/udate")
 	public ResponseEntity<ExpenseListDTO> updateUserExpenseList(@RequestBody ExpenseListDTO expenseListDTO){
 		return new ResponseEntity<ExpenseListDTO>(expenseListService.updateUserExpenseListByIdAndUserId(expenseListDTO) , HttpStatus.OK);
-
 	}
-
+	
 }

@@ -2,6 +2,8 @@ package com.alex.myexpenses.interfaces.expense;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.alex.myexpenses.dto.expense.ExpenseListDTO;
 
 public interface IExpenseListService {
@@ -13,5 +15,9 @@ public interface IExpenseListService {
 	Boolean deleteUserExpenseListByIdAndUserId(Long id);
 	
 	ExpenseListDTO updateUserExpenseListByIdAndUserId(ExpenseListDTO expenseListDTO);
+	
+	ExpenseListDTO getExpenseListById(@NotNull Long id);
+	
+//	List<ExpenseListDTO> getRandomExpenseListForDemo();
 	
 }

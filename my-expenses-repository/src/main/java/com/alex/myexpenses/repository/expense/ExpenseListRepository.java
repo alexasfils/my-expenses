@@ -18,4 +18,6 @@ public interface ExpenseListRepository extends JpaRepository<ExpenseListEntity, 
 	Integer deleteByIdAndUserId(Long listId, Long userId);
 	
 	Optional<ExpenseListEntity> findByIdAndUserId(Long listId, Long userId);
+	
+//	List<ExpenseListEntity> findTop30ByOrderByCreatedAtDesc();
 }
