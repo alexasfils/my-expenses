@@ -38,7 +38,7 @@ public class ExpenseListEntity implements Serializable {
 	@Column(name = "name", length = 100, nullable = false)
 	private String name;
 	
-	@Column(name = "month", nullable = false, updatable = false)
+	@Column(name = "month", nullable = false)
 	private Integer month;
 	
 	@Column(name = "budget", nullable = false)

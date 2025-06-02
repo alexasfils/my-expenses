@@ -23,5 +23,8 @@ public interface ExpenseRepository extends JpaRepository<ExpenseEntity, Long>{
 	@Modifying
 	@Query("DELETE FROM ExpenseEntity e WHERE e.expenseList.id = :expenseListId AND e.expenseList.user.id = :userId")
 	Integer deleteByExpenseListIdAndUserId(@Param("expenseListId") Long expenseListId, @Param("userId") Long userId);
+	
+	 @Query("SELECT COALESCE(SUM(e.amount), 0) FROM ExpenseEntity e WHERE e.expenseList.id = :expenseListId")
+	 Double sumAmountsByExpenseListId(@Param("expenseListId") Long expenseListId);
 
 }
