@@ -108,12 +108,16 @@ public class ExpenseListService implements IExpenseListService{
 	    
 	    ExpenseListEntity list = expenseListRepository.findByIdAndUserId(expenseListDTO.getId(), user.getId())
 	    		.orElseThrow(() -> new EntityNotFoundException("UserExpenseList not found in database or not valid id or userId"));
+	    System.out.println("Before save month: " + list.getMonth());
 
 	    list.setName(expenseListDTO.getName());
 	    list.setMonth(expenseListDTO.getMonth());
 	    list.setBudget(expenseListDTO.getBudget());
+	    
+	    ExpenseListEntity saved = expenseListRepository.save(list);
+	    System.out.println("After save month: " + saved.getMonth());
+	    return modelMapper.map(saved, ExpenseListDTO.class);
 
-		return modelMapper.map(expenseListRepository.save(list), ExpenseListDTO.class);
 	}
 
 	@Override

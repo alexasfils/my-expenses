@@ -1,6 +1,7 @@
 package com.alex.myexpenses.service.expense;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
@@ -29,7 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class ExpenseService implements IExpenseService{
+public class ExpenseService implements IExpenseService {
+	
+	private final String EXPENSE_LIST_NOT_FOUND = "ExpenseList not found in database or not valid id";
+	private final String EXPENSE_NOT_FOUND = "Expense not found in database or not valid id";
 	
 	@Autowired
 	private ExpenseRepository expenseRepository;
@@ -79,7 +83,7 @@ public class ExpenseService implements IExpenseService{
 		//save ExpenseEntity
 		ExpenseEntity savedExpense = expenseRepository.save(expenseEntity);
 		//calcolate ExpenseLists totalExpenses
-		Double updatedTotal = expenseListEntity.getTotalExpense() + savedExpense.getAmount();
+		Double updatedTotal = expenseRepository.sumAmountsByExpenseListId(expenseListEntity.getId());
 		//set ExpenseLists totalExpenses
 		expenseListEntity.setTotalExpense(updatedTotal);
 		//save ExpenseListEntity
@@ -100,12 +104,20 @@ public class ExpenseService implements IExpenseService{
                 .orElseThrow(() -> new RuntimeException("User not found"));
 	    
 	    ExpenseEntity expense = expenseRepository.findById(expenseId)
-	            .orElseThrow(() -> new EntityNotFoundException("Expense not found in database or not valid id "));
+	            .orElseThrow(() -> new EntityNotFoundException(EXPENSE_NOT_FOUND));
 	    
 	    if (!expense.getExpenseList().getUser().getId().equals(user.getId())) {
 	        throw new RuntimeException("You are not authorized to delete this expense");
 	    }
-	     expenseRepository.deleteById(expenseId);
+	    expenseRepository.deleteById(expenseId);
+	    
+	    Long expenseListId = expense.getExpenseList().getId();
+	    Double total = expenseRepository.sumAmountsByExpenseListId(expenseListId);
+	    
+	    ExpenseListEntity list = expenseListRepository.findById(expenseListId)
+	    		.orElseThrow(() -> new EntityNotFoundException(EXPENSE_LIST_NOT_FOUND));
+	    list.setTotalExpense(total);
+	    expenseListRepository.save(list);
 	    
 	    log.info("Expense {} deleted by user {}", expenseId, email);
 		
@@ -128,6 +140,14 @@ public class ExpenseService implements IExpenseService{
 	            throw new EntityNotFoundException("No expenses found for the given expense list and user.");
 	    		}
 	    		
+	    		    Double total = expenseRepository.sumAmountsByExpenseListId(expenseListId);
+
+	    		    // aggiorna il totale nella lista
+	    		    ExpenseListEntity list = expenseListRepository.findById(expenseListId)
+	    		    		.orElseThrow(() -> new EntityNotFoundException(EXPENSE_LIST_NOT_FOUND));
+	    		    list.setTotalExpense(total);
+	    		    expenseListRepository.save(list);
+	    		
 	    		log.info("Deleted {} expenses from expenseList {} by user {}", deletedCount, expenseListId, email);
 		return true;
 	}
@@ -146,6 +166,14 @@ public class ExpenseService implements IExpenseService{
 	    CategoryEntity category = categoryRepository.findById(expenseDTO.getCategoryId())
 	    		.orElseThrow(() -> new EntityNotFoundException("Category not found in database or not valid id "));
 	    
+	    Long expenseListId = expenseDTO.getExpenseListId();
+	    Double total = expenseRepository.sumAmountsByExpenseListId(expenseListId);
+	    
+	    ExpenseListEntity list = expenseListRepository.findById(expenseListId)
+	    		.orElseThrow(() -> new EntityNotFoundException(EXPENSE_LIST_NOT_FOUND));
+	    list.setTotalExpense(total);
+	    expenseListRepository.save(list);
+	    
 	    ExpenseEntity expense = expenseRepository.findByIdAndExpenseListUserId(expenseDTO.getId(), user.getId())
 	            .orElseThrow(() -> new AccessDeniedException("You are not allowed to update this expense"));
 	    
@@ -154,6 +182,7 @@ public class ExpenseService implements IExpenseService{
 	    expense.setAmount(expenseDTO.getAmount());
 	    expense.setDescription(expenseDTO.getDescription());
 	    expense.setCategory(category);
+	   
 	    
 	    log.info("Expense with id {} updated by user {}", expense.getId(), email);
 		

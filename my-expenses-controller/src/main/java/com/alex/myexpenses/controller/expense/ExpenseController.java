@@ -48,7 +48,7 @@ public class ExpenseController {
 		return ResponseEntity.ok(expenseService.deleteExpenseByExpenseListAndUserId(expenseListId));
 	}
 	
-	@PutMapping("/udate")
+	@PutMapping("/update")
 	public ResponseEntity<ExpenseDTO> updateUserExpense(@RequestBody ExpenseDTO expenseDTO){
 		return new ResponseEntity<ExpenseDTO>(expenseService.updateExpense(expenseDTO) , HttpStatus.OK);
 
