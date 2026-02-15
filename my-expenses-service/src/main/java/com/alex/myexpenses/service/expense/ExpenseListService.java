@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.alex.myexpenses.controller.exception.AlreadyExistsException;
 import com.alex.myexpenses.controller.exception.ResourceNotFoundException;
 import com.alex.myexpenses.dto.expense.ExpenseListCreateDTO;
 import com.alex.myexpenses.dto.expense.ExpenseListDTO;
@@ -60,6 +61,8 @@ public class ExpenseListService implements IExpenseListService {
 	@Transactional
 	public ExpenseListDTO save(ExpenseListCreateDTO expenseListCreateDTO) {
 		UserEntity user = securityService.getAuthenticatedUser();
+		
+		IsExistingExpenseListName(expenseListCreateDTO.getName(), user.getId());
 	    
 	    ExpenseListEntity expenseListEntity = new ExpenseListEntity();
 	    expenseListEntity.initUserExpenseList(expenseListCreateDTO.getName(), expenseListCreateDTO.getMonth(), expenseListCreateDTO.getBudget(), user);
@@ -87,9 +90,13 @@ public class ExpenseListService implements IExpenseListService {
 	@Transactional
 	public ExpenseListDTO updateUserExpenseListByIdAndUserId(ExpenseListDTO expenseListDTO) {
 		UserEntity user = securityService.getAuthenticatedUser();
-	    
+			    
 	    ExpenseListEntity list = expenseListRepository.findByIdAndUserId(expenseListDTO.getId(), user.getId())
 	    		.orElseThrow(() -> new ResourceNotFoundException(EXPENSE_LIST, ID, expenseListDTO.getId()));
+	    
+	    if (!list.getName().equalsIgnoreCase(expenseListDTO.getName())) {
+	    	IsExistingExpenseListName(expenseListDTO.getName(), user.getId());
+	    }
 	    
 	    list.updateExpenseList(expenseListDTO.getName(), expenseListDTO.getMonth(), expenseListDTO.getBudget());
 	    
@@ -103,6 +110,12 @@ public class ExpenseListService implements IExpenseListService {
 		ExpenseListEntity expenseList = expenseListRepository.findByIdAndUserId(id, user.getId())
 				.orElseThrow(() -> new ResourceNotFoundException(EXPENSE_LIST, ID, id));
 		return modelMapper.map(expenseList, ExpenseListDetailDTO.class);
+	}
+	
+	private void IsExistingExpenseListName(String name, Long userId) {
+		 if(expenseListRepository.existsByNameIgnoreCaseAndUserId(name, userId)) {
+			 throw new AlreadyExistsException("ExpenseList name must be Unique");
+		 }
 	}
 
 //	@Override

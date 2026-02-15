@@ -21,6 +21,8 @@ public interface ExpenseListRepository extends JpaRepository<ExpenseListEntity, 
 	Optional<ExpenseListEntity> findByIdAndUserId(Long listId, Long userId);
 	
      Optional<ExpenseListEntity> findById(Long listId);
+     
+     boolean existsByNameIgnoreCaseAndUserId(String name, Long userId);
 	
 //	List<ExpenseListEntity> findTop30ByOrderByCreatedAtDesc();
 }
