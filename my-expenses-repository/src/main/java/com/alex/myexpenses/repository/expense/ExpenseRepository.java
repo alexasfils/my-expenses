@@ -32,7 +32,7 @@ public interface ExpenseRepository extends JpaRepository<ExpenseEntity, Long>{
 	 
 	 @Modifying(clearAutomatically = true)
 	 @Query("UPDATE ExpenseEntity e SET e.category = :defaultCat " +
-	        "WHERE e.category = :oldCat AND e.user.id = :userId")
+	        "WHERE e.category = :oldCat AND e.expenseList.user.id = :userId")
 	 void migrateExpenses(@Param("oldCat") CategoryEntity oldCat, 
 	                     @Param("defaultCat") CategoryEntity defaultCat, 
 	                     @Param("userId") Long userId);
