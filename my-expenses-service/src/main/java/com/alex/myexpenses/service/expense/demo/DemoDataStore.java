@@ -5,40 +5,53 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Component;
-import com.alex.myexpenses.dto.expense.ExpenseDTO;
-import com.alex.myexpenses.dto.expense.ExpenseListDTO;
+import org.springframework.web.context.annotation.SessionScope;
+
+import com.alex.myexpenses.controller.exception.DemoLimitReachedException;
+import com.alex.myexpenses.dto.expense.ExpenseDetailDTO;
+import com.alex.myexpenses.dto.expense.ExpenseListDetailDTO;
+
+import static com.alex.myexpenses.utility.AppConstants.Entity.*;
+import static com.alex.myexpenses.utility.AppConstants.ExceptionMessage.*;
+
 
 import lombok.extern.slf4j.Slf4j;
 
 @Component
+@SessionScope
 @Slf4j
 public class DemoDataStore {
-	private final Map<Long, ExpenseListDTO> expenseLists = Collections.synchronizedMap(new HashMap<>());
-	private final Map<Long, List<ExpenseDTO>> expenses = Collections.synchronizedMap(new HashMap<>());
-	private Long listIdCounter = 1L;
-	private Long expenseIdCounter = 1L;
-
-	public ExpenseListDTO createExpenseList(ExpenseListDTO dto) {
+	
+	private final Map<Long, ExpenseListDetailDTO> expenseLists = Collections.synchronizedMap(new HashMap<>());
+	private final Map<Long, List<ExpenseDetailDTO>> expenses = Collections.synchronizedMap(new HashMap<>());
+	private final AtomicLong listIdCounter = new AtomicLong(1);
+	private final AtomicLong expenseIdCounter = new AtomicLong(1);
+	
+	public ExpenseListDetailDTO createExpenseList(ExpenseListDetailDTO dto) {
 		if (!expenseLists.isEmpty()) {
-			throw new RuntimeException("Puoi creare solo una lista nella modalità demo");
+			log.warn("Tentativo di creazione lista multipla in modalità demo bloccato");
+			throw new DemoLimitReachedException(DEMO_LIMIT_REACHED);
 		}
 
-		dto.setId(listIdCounter);
+		Long newId = listIdCounter.getAndIncrement();
+		dto.setId(newId);
 		dto.setTotalExpense(0.0);
-		expenseLists.put(dto.getId(), dto);
-		expenses.put(dto.getId(), new ArrayList<>());
+		
+		expenseLists.put(newId, dto);
+		expenses.put(newId, new ArrayList<>());
 
-		System.out.println(dto);
+		log.info("Created Demo ExpenseList: {}", dto);
 
 		return dto;
 	}
 
-	public List<ExpenseListDTO> getAllExpenseLists() {
-	    List<ExpenseListDTO> lists = new ArrayList<>(expenseLists.values());
-	    for (ExpenseListDTO list : lists) {
-	        List<ExpenseDTO> listExpenses = expenses.get(list.getId());
+	public List<ExpenseListDetailDTO> getAllExpenseLists() {
+	    List<ExpenseListDetailDTO> lists = new ArrayList<>(expenseLists.values());
+	    for (ExpenseListDetailDTO list : lists) {
+	        List<ExpenseDetailDTO> listExpenses = expenses.get(list.getId());
 	        if (listExpenses == null) {
 	            listExpenses = new ArrayList<>();
 	        }
@@ -55,56 +68,48 @@ public class DemoDataStore {
 		return false;
 	}
 
-	public ExpenseDTO addExpense(ExpenseDTO dto) {
-
+	public ExpenseDetailDTO addExpense(ExpenseDetailDTO dto) {
 		log.info("Current expenseLists: {}", expenseLists.keySet());
 		Long listId = dto.getExpenseListId();
 
-		System.out.println("dto.getExpenseListId() " + dto.getExpenseListId());
-
 		// Verifica se esiste la lista
 		if (!expenseLists.containsKey(listId)) {
-			throw new IllegalArgumentException("La lista spese con ID " + listId + " non esiste.");
+			throw new IllegalArgumentException(EXPENSE_LIST + " con id " + listId + " non esiste.");
 		}
+		List<ExpenseDetailDTO> listExpenses = expenses.computeIfAbsent(listId, k -> Collections.synchronizedList(new ArrayList<>()));
 
-		List<ExpenseDTO> listExpenses = expenses.get(listId);
-		if (listExpenses == null) {
-			// Per sicurezza, inizializza una lista vuota se manca
-			listExpenses = new ArrayList<>();
-			expenses.put(listId, listExpenses);
-		}
-
-		dto.setId(expenseIdCounter++);
+		Long newId = expenseIdCounter.getAndIncrement();
+		dto.setId(newId);
 		listExpenses.add(dto);
 
 		// Aggiorna il totale delle spese nella lista
-		ExpenseListDTO list = expenseLists.get(listId);
-		double total = listExpenses.stream().mapToDouble(ExpenseDTO::getAmount).sum();
+		ExpenseListDetailDTO list = expenseLists.get(listId);
+		double total = listExpenses.stream().mapToDouble(e -> e.getAmount() != null ? e.getAmount() : 0.0).sum();
+		log.info("Added Expense ID {} to List ID {}", newId, listId);
 		list.setTotalExpense(total);
 
 		return dto;
 	}
 
-	public ExpenseListDTO getExpenseList(Long listId) {
-		ExpenseListDTO list = expenseLists.get(listId);
+	public ExpenseListDetailDTO getExpenseList(Long listId) {
+		ExpenseListDetailDTO list = expenseLists.get(listId);
 		
 		if(list != null) {
-			List<ExpenseDTO> listExpenses = expenses.get(listId);
-			if(listExpenses ==null) {
-				listExpenses = new ArrayList<>();
-			}
-			list.setExpenses(listExpenses);
+			List<ExpenseDetailDTO> listExpenses = expenses.get(listId);
+			
+			list.setExpenses(listExpenses != null ? listExpenses : new ArrayList<>());
+			return list;
 		}
 		
 		
-		return expenseLists.get(listId);
+		return null;
 	}
 
 	public void reset() {
 		expenseLists.clear();
 		expenses.clear();
-		listIdCounter = 1L;
-		expenseIdCounter = 1L;
+		listIdCounter.set(1);
+		expenseIdCounter.set(1);
 	}
 
 }

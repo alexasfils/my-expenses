@@ -1,22 +1,23 @@
 package com.alex.myexpenses.interfaces.expense;
 
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
 
+import com.alex.myexpenses.dto.expense.ExpenseListCreateDTO;
 import com.alex.myexpenses.dto.expense.ExpenseListDTO;
+import com.alex.myexpenses.dto.expense.ExpenseListDetailDTO;
+import com.alex.myexpenses.utility.PaginatorDTO;
 
 public interface IExpenseListService {
 
-	List<ExpenseListDTO> getAllUserExpenseList();
+	PaginatorDTO<ExpenseListDetailDTO> getAllUserExpenseList(int page, long size);
 	
-	ExpenseListDTO save(ExpenseListDTO expenseListDTO);
+	ExpenseListDTO save(ExpenseListCreateDTO expenseListCreateDTO);
 	
 	Boolean deleteUserExpenseListByIdAndUserId(Long id);
 	
 	ExpenseListDTO updateUserExpenseListByIdAndUserId(ExpenseListDTO expenseListDTO);
 	
-	ExpenseListDTO getExpenseListById(@NotNull Long id);
+	ExpenseListDetailDTO getExpenseListById(@NotNull Long id);
 	
 //	List<ExpenseListDTO> getRandomExpenseListForDemo();
 	

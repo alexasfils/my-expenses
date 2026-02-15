@@ -1,21 +1,28 @@
 package com.alex.myexpenses.service.expense;
 
+import static com.alex.myexpenses.utility.AppConstants.Entity.CATEGORY;
+import static com.alex.myexpenses.utility.AppConstants.Entity.EXPENSE;
+import static com.alex.myexpenses.utility.AppConstants.Entity.EXPENSE_LIST;
+import static com.alex.myexpenses.utility.AppConstants.Field.ID;
+import static com.alex.myexpenses.utility.AppConstants.Field.NAME;
+
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.alex.myexpenses.dto.expense.ExpenseDTO;
-import com.alex.myexpenses.dto.user.UserPrincipal;
+import com.alex.myexpenses.controller.exception.ResourceNotFoundException;
+import com.alex.myexpenses.dto.expense.ExpenseCreateDTO;
+import com.alex.myexpenses.dto.expense.ExpenseDetailDTO;
+import com.alex.myexpenses.dto.expense.ExpenseSimpleDTO;
 import com.alex.myexpenses.entity.expenses.CategoryEntity;
 import com.alex.myexpenses.entity.expenses.ExpenseEntity;
 import com.alex.myexpenses.entity.expenses.ExpenseListEntity;
@@ -24,7 +31,8 @@ import com.alex.myexpenses.interfaces.expense.IExpenseService;
 import com.alex.myexpenses.repository.expense.CategoryRepository;
 import com.alex.myexpenses.repository.expense.ExpenseListRepository;
 import com.alex.myexpenses.repository.expense.ExpenseRepository;
-import com.alex.myexpenses.repository.user.UserRepository;
+import com.alex.myexpenses.service.security.SecurityService;
+import com.alex.myexpenses.utility.PaginatorDTO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,94 +40,82 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ExpenseService implements IExpenseService {
 	
-	private final String EXPENSE_LIST_NOT_FOUND = "ExpenseList not found in database or not valid id";
-	private final String EXPENSE_NOT_FOUND = "Expense not found in database or not valid id";
+	private final ExpenseRepository expenseRepository;
+	private final ExpenseListRepository expenseListRepository;
+	private final CategoryRepository categoryRepository;
+	private final SecurityService securityService;
+	private final ModelMapper modelMapper;
 	
-	@Autowired
-	private ExpenseRepository expenseRepository;
-	
-	@Autowired
-	private ExpenseListRepository expenseListRepository;
-	
-	@Autowired
-	private CategoryRepository categoryRepository;
-	
-	@Autowired
-	private UserRepository userRepository;
-	
-	@Autowired
-	private ModelMapper modelMapper;
+	public ExpenseService(ExpenseRepository expenseRepository, ExpenseListRepository expenseListRepository,
+			CategoryRepository categoryRepository, SecurityService securityService, ModelMapper modelMapper) {
+		super();
+		this.expenseRepository = expenseRepository;
+		this.expenseListRepository = expenseListRepository;
+		this.categoryRepository = categoryRepository;
+		this.securityService = securityService;
+		this.modelMapper = modelMapper;
+	}
 
 	@Override
-	public List<ExpenseDTO> getAllExpenseByExpenseListId(Long expenseListId) {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	    if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal)) {
-	        throw new RuntimeException("user is not Authenticated");
-	    }
-	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername(); // ← la tua email
-	    UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+	public PaginatorDTO<ExpenseDetailDTO> getAllExpenseByExpenseListId(Long expenseListId, int page, long size) {
+		Pageable pageable = PageRequest.of(page, (int) size);
 		
-		List<ExpenseEntity> expenseLists = expenseRepository.findByExpenseListIdAndExpenseListUserId(expenseListId, user.getId());
+		UserEntity user = securityService.getAuthenticatedUser();
 		
-		return expenseLists.stream()
-				.map(x -> modelMapper.map(x, ExpenseDTO.class))
+		Page<ExpenseEntity> expenseLists = expenseRepository.findByExpenseListIdAndExpenseListUserId(expenseListId, user.getId(), pageable);
+		List<ExpenseDetailDTO> expenseDTO = expenseLists.getContent().stream()
+				.map(x -> modelMapper.map(x, ExpenseDetailDTO.class))
 				.collect(Collectors.toList());
+		return new PaginatorDTO<>(expenseDTO, expenseLists.getTotalPages(), expenseLists.getTotalElements());
 	}
 
 	@Override
 	@Transactional
-	public ExpenseDTO save(ExpenseDTO expenseDTO) {
+	public ExpenseDetailDTO save(ExpenseCreateDTO expenseCreateDTO) {
+		UserEntity user = securityService.getAuthenticatedUser();
+		
 		//Find category
-		CategoryEntity categoryEntity = categoryRepository.findById(expenseDTO.getCategoryId())
-				.orElseThrow(() -> new EntityNotFoundException("Category not found with ID: " + expenseDTO.getExpenseListId()));
+	    CategoryEntity category = findCategoryOrThrow(expenseCreateDTO.getCategoryName(), user.getId());
+	    
 		//Find expenseList
-		ExpenseListEntity expenseListEntity = expenseListRepository.findById(expenseDTO.getExpenseListId())
-				.orElseThrow(() -> new EntityNotFoundException("ExpenseListEntity not found with ID: " + expenseDTO.getExpenseListId()));
-		//Crate and mapp ExpenseEntity
-		ExpenseEntity expenseEntity = modelMapper.map(expenseDTO, ExpenseEntity.class);
-		//set category
-		expenseEntity.setCategory(categoryEntity);
-		//save ExpenseEntity
-		ExpenseEntity savedExpense = expenseRepository.save(expenseEntity);
-		//calcolate ExpenseLists totalExpenses
-		Double updatedTotal = expenseRepository.sumAmountsByExpenseListId(expenseListEntity.getId());
-		//set ExpenseLists totalExpenses
-		expenseListEntity.setTotalExpense(updatedTotal);
-		//save ExpenseListEntity
+		ExpenseListEntity expenseListEntity = expenseListRepository.findByIdAndUserId(expenseCreateDTO.getExpenseListId(), user.getId())
+				.orElseThrow(() -> new ResourceNotFoundException(EXPENSE_LIST, ID, expenseCreateDTO.getExpenseListId()));
+		//Crate and map ExpenseEntity
+		ExpenseEntity expenseEntity = modelMapper.map(expenseCreateDTO, ExpenseEntity.class);
+		expenseEntity.setId(null);
+		expenseEntity.setExpenseList(expenseListEntity);
+		expenseEntity.setCategory(category);
+		
+		//calcolate add expense amount to ExpenseList totalExpenses
+		expenseListEntity.addAmount(expenseEntity.getAmount());
+		
+		ExpenseEntity savedExpense = expenseRepository.saveAndFlush(expenseEntity);
+		
 		expenseListRepository.save(expenseListEntity);
 		
-		return modelMapper.map(savedExpense, ExpenseDTO.class);
+		return modelMapper.map(savedExpense, ExpenseDetailDTO.class);
 	}
-
+	
 	@Override
 	@Transactional
 	public Boolean deleteExpenseById(Long expenseId) {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	    if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal)) {
-	        throw new RuntimeException("user is not Authenticated");
-	    }
-	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername(); // ← la tua email
-	    UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+		UserEntity user = securityService.getAuthenticatedUser();
 	    
 	    ExpenseEntity expense = expenseRepository.findById(expenseId)
-	            .orElseThrow(() -> new EntityNotFoundException(EXPENSE_NOT_FOUND));
+	            .orElseThrow(() -> new ResourceNotFoundException(EXPENSE, ID, expenseId));
 	    
 	    if (!expense.getExpenseList().getUser().getId().equals(user.getId())) {
-	        throw new RuntimeException("You are not authorized to delete this expense");
+	        throw new AccessDeniedException("You are not authorized to delete this expense");
 	    }
 	    expenseRepository.deleteById(expenseId);
+	    expenseRepository.flush();
 	    
-	    Long expenseListId = expense.getExpenseList().getId();
-	    Double total = expenseRepository.sumAmountsByExpenseListId(expenseListId);
-	    
-	    ExpenseListEntity list = expenseListRepository.findById(expenseListId)
-	    		.orElseThrow(() -> new EntityNotFoundException(EXPENSE_LIST_NOT_FOUND));
-	    list.setTotalExpense(total);
+	    ExpenseListEntity list = expense.getExpenseList();
+
+	    list.removeExpenseFromTotal(expense.getAmount());
 	    expenseListRepository.save(list);
 	    
-	    log.info("Expense {} deleted by user {}", expenseId, email);
+	    log.info("Expense {} deleted by user {}", expenseId, user.getEmail());
 		
 		return true;
 	}
@@ -127,66 +123,55 @@ public class ExpenseService implements IExpenseService {
 	@Override
 	@Transactional
 	public Boolean deleteExpenseByExpenseListAndUserId(Long expenseListId) {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	    if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal)) {
-	        throw new RuntimeException("user is not Authenticated");
-	    }
-	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername(); // ← la tua email
-	    UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-	    
-	    Integer deletedCount = expenseRepository.deleteByExpenseListIdAndUserId(expenseListId, user.getId());
-	    		if(deletedCount == 0) {
-	            throw new EntityNotFoundException("No expenses found for the given expense list and user.");
-	    		}
-	    		
-	    		    Double total = expenseRepository.sumAmountsByExpenseListId(expenseListId);
+		UserEntity user = securityService.getAuthenticatedUser();
 
-	    		    // aggiorna il totale nella lista
-	    		    ExpenseListEntity list = expenseListRepository.findById(expenseListId)
-	    		    		.orElseThrow(() -> new EntityNotFoundException(EXPENSE_LIST_NOT_FOUND));
-	    		    list.setTotalExpense(total);
-	    		    expenseListRepository.save(list);
-	    		
-	    		log.info("Deleted {} expenses from expenseList {} by user {}", deletedCount, expenseListId, email);
+		Integer deletedCount = expenseRepository.deleteByExpenseListIdAndUserId(expenseListId, user.getId());
+		if (deletedCount == 0) {
+			throw new ResourceNotFoundException(EXPENSE, ID, expenseListId);
+		}
+
+		// aggiorna il totale nella lista
+		ExpenseListEntity list = expenseListRepository.findById(expenseListId)
+				.orElseThrow(() -> new ResourceNotFoundException(EXPENSE_LIST, ID, expenseListId));
+		list.resetTotal();
+		expenseListRepository.save(list);
+
+		log.info("Deleted {} expenses from expenseList {} by user {}", deletedCount, expenseListId, user.getEmail());
 		return true;
 	}
 
 	@Override
 	@Transactional
-	public ExpenseDTO updateExpense(ExpenseDTO expenseDTO) {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	    if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal)) {
-	        throw new RuntimeException("user is not Authenticated");
-	    }
-	    String email = ((UserPrincipal) auth.getPrincipal()).getUsername(); // ← la tua email
-	    UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-	    
-	    CategoryEntity category = categoryRepository.findById(expenseDTO.getCategoryId())
-	    		.orElseThrow(() -> new EntityNotFoundException("Category not found in database or not valid id "));
-	    
-	    Long expenseListId = expenseDTO.getExpenseListId();
-	    Double total = expenseRepository.sumAmountsByExpenseListId(expenseListId);
-	    
-	    ExpenseListEntity list = expenseListRepository.findById(expenseListId)
-	    		.orElseThrow(() -> new EntityNotFoundException(EXPENSE_LIST_NOT_FOUND));
-	    list.setTotalExpense(total);
-	    expenseListRepository.save(list);
-	    
-	    ExpenseEntity expense = expenseRepository.findByIdAndExpenseListUserId(expenseDTO.getId(), user.getId())
-	            .orElseThrow(() -> new AccessDeniedException("You are not allowed to update this expense"));
-	    
-	    expense.setName(expenseDTO.getName());
-	    expense.setExpenseDate(expenseDTO.getExpenseDate());
-	    expense.setAmount(expenseDTO.getAmount());
-	    expense.setDescription(expenseDTO.getDescription());
-	    expense.setCategory(category);
-	   
-	    
-	    log.info("Expense with id {} updated by user {}", expense.getId(), email);
+	public ExpenseDetailDTO updateExpense(ExpenseSimpleDTO expenseSimpleDTO) {
+		UserEntity user = securityService.getAuthenticatedUser();
+
+		ExpenseEntity expense = expenseRepository.findByIdAndExpenseListUserId(expenseSimpleDTO.getId(), user.getId())
+				.orElseThrow(() -> new ResourceNotFoundException(EXPENSE, ID, expenseSimpleDTO.getId()));
+
+		ExpenseListEntity expenseList = expense.getExpenseList();
+		Double oldAmount = expense.getAmount();
+
+		modelMapper.map(expenseSimpleDTO, expense);
+		// Find category
+		CategoryEntity category = findCategoryOrThrow(expenseSimpleDTO.getCategoryName(), user.getId());
+		expense.setCategory(category);
+
+		if (! Objects.equals(oldAmount, expense.getAmount())) {
+			expenseList.updateBalance(oldAmount, expense.getAmount());
+			expenseListRepository.save(expenseList);
+		}
 		
-		return modelMapper.map(expenseRepository.save(expense), ExpenseDTO.class);
+		ExpenseEntity updatedExpense = expenseRepository.saveAndFlush(expense);
+
+		log.info("Expense with id {} updated by user {}", expense.getId(), user.getEmail());
+
+		return modelMapper.map(updatedExpense, ExpenseDetailDTO.class);
+	}
+	
+	private CategoryEntity findCategoryOrThrow(String categoryName, Long userId) {
+		return categoryRepository.findByNameAndUserId(categoryName, userId).or(() -> 
+		categoryRepository.findByNameAndIsDefaultTrue(categoryName)).orElseThrow(() -> 
+		new ResourceNotFoundException(CATEGORY, NAME, categoryName));
 	}
 
 }

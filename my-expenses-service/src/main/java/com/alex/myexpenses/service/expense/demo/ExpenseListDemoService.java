@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alex.myexpenses.dto.expense.ExpenseDTO;
-import com.alex.myexpenses.dto.expense.ExpenseListDTO;
+import com.alex.myexpenses.dto.expense.ExpenseDetailDTO;
+import com.alex.myexpenses.dto.expense.ExpenseListDetailDTO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,14 +14,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ExpenseListDemoService {
 	
-	@Autowired
-	private DemoDataStore store;
+	private final DemoDataStore store;
 	
-	 public ExpenseListDTO createExpenseList(ExpenseListDTO dto) {
+	public ExpenseListDemoService(DemoDataStore store) {
+		super();
+		this.store = store;
+	}
+	
+	 public ExpenseListDetailDTO createExpenseList(ExpenseListDetailDTO dto) {
 	        return store.createExpenseList(dto);
 	    }
 
-	    public List<ExpenseListDTO> getAll() {
+	    public List<ExpenseListDetailDTO> getAll() {
 	        return store.getAllExpenseLists();
 	    }
 
@@ -29,11 +33,11 @@ public class ExpenseListDemoService {
 	        return store.deleteExpenseList(id);
 	    }
 
-	    public ExpenseDTO addExpense(ExpenseDTO dto) {
+	    public ExpenseDetailDTO addExpense(ExpenseDetailDTO dto) {
 	        return store.addExpense(dto);
 	    }
 
-	    public ExpenseListDTO getExpenseListById(Long listId) {
+	    public ExpenseListDetailDTO getExpenseListById(Long listId) {
 	        return store.getExpenseList(listId);
 	    }
 

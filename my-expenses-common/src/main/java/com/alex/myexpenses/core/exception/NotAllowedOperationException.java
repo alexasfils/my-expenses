@@ -1,4 +1,4 @@
-package com.alex.myexpenses.controller.exception;
+package com.alex.myexpenses.core.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

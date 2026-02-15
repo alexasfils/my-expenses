@@ -1,4 +1,4 @@
-package com.alex.myexpenses.dto.user;
+package com.alex.myexpenses.service.security;
 
 import java.util.Collection;
 import java.util.Collections;

@@ -8,10 +8,5 @@
   <artifactId>my-expenses-common</artifactId>
 
 	<dependencies>
-		<dependency>
-			<groupId>com.alex.myexpenses</groupId>
-			<artifactId>my-expenses-entity</artifactId>
-			<version>1.0.0</version>
-		</dependency>
 	</dependencies>
 </project>

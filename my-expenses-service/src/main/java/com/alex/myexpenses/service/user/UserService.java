@@ -2,44 +2,47 @@ package com.alex.myexpenses.service.user;
 
 import java.time.LocalDate;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.alex.myexpenses.dto.user.JwtTokenUtil;
 import com.alex.myexpenses.dto.user.LoginResponseDTO;
 import com.alex.myexpenses.dto.user.UserDTO;
-import com.alex.myexpenses.dto.user.UserPrincipal;
 import com.alex.myexpenses.entity.user.UserEntity;
 import com.alex.myexpenses.interfaces.user.IUserService;
 import com.alex.myexpenses.repository.user.UserRepository;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.alex.myexpenses.service.security.UserPrincipal;
+
+import static com.alex.myexpenses.utility.AppConstants.ExceptionMessage.*;
+
 
 @Service
 public class UserService implements IUserService {
+		
+	private final ModelMapper modelMapper;
+	private final UserRepository userRepository;
+	private final BCryptPasswordEncoder passwordEncoder;
+	private final JwtTokenUtil jwtTokenUtil;
 	
-	@Autowired
-	private ModelMapper modelMapper;
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private BCryptPasswordEncoder passwordEncoder;
-	
-	@Autowired
-	private JwtTokenUtil jwtTokenUtil;
-	
+	public UserService(ModelMapper modelMapper, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder,
+			JwtTokenUtil jwtTokenUtil) {
+		super();
+		this.modelMapper = modelMapper;
+		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
+		this.jwtTokenUtil = jwtTokenUtil;
+	}
+
 	@Override
 	public LoginResponseDTO login(String email, String password) {
 		
-		UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(
-				"USer not found for email and password: " + email));
+		UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new BadCredentialsException(INVALID_CREDENTIALS));
 
 		if(!passwordEncoder.matches(password, userEntity.getPassword())) {
-			 throw new BadCredentialsException("Invalid password");
+			 throw new BadCredentialsException(INVALID_CREDENTIALS);
 		}
 		
 		UserDetails userDetails = new UserPrincipal(userEntity);

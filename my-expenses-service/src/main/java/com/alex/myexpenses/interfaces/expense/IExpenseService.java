@@ -1,21 +1,22 @@
 package com.alex.myexpenses.interfaces.expense;
 
-import java.util.List;
-
-import com.alex.myexpenses.dto.expense.ExpenseDTO;
+import com.alex.myexpenses.dto.expense.ExpenseCreateDTO;
+import com.alex.myexpenses.dto.expense.ExpenseDetailDTO;
+import com.alex.myexpenses.dto.expense.ExpenseSimpleDTO;
+import com.alex.myexpenses.utility.PaginatorDTO;
 
 import lombok.NonNull;
 
 public interface IExpenseService {
 	
-	List<ExpenseDTO> getAllExpenseByExpenseListId(@NonNull Long expenseListId);
+	PaginatorDTO<ExpenseDetailDTO> getAllExpenseByExpenseListId(@NonNull Long expenseListId, int page, long size);
 	
-	ExpenseDTO save(ExpenseDTO expenseDTO);
+	ExpenseDetailDTO save(ExpenseCreateDTO expenseCreateDTO);
 	
 	Boolean deleteExpenseById(@NonNull Long expenseId);
 	
 	Boolean deleteExpenseByExpenseListAndUserId(Long expenseListId);
 	
-	ExpenseDTO updateExpense(ExpenseDTO expenseDTO);
+	ExpenseDetailDTO updateExpense(ExpenseSimpleDTO expenseSimpleDTO);
 
 }
