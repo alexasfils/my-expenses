@@ -1,20 +1,23 @@
 package com.alex.myexpenses.service.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.alex.myexpenses.dto.user.UserPrincipal;
 import com.alex.myexpenses.entity.user.UserEntity;
 import com.alex.myexpenses.repository.user.UserRepository;
+import com.alex.myexpenses.service.security.UserPrincipal;
 
 @Service
-public class MyUserDetailsService implements UserDetailsService{
-
-	@Autowired
-	private UserRepository userRepository;
+public class MyUserDetailsService implements UserDetailsService {
+	
+	private final UserRepository userRepository;
+	
+	public MyUserDetailsService (UserRepository userRepository) {
+		super();
+		this.userRepository = userRepository;
+	}
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

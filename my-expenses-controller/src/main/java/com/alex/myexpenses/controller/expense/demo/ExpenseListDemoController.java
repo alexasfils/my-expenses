@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alex.myexpenses.dto.expense.ExpenseDTO;
-import com.alex.myexpenses.dto.expense.ExpenseListDTO;
+import com.alex.myexpenses.dto.expense.ExpenseDetailDTO;
+import com.alex.myexpenses.dto.expense.ExpenseListDetailDTO;
 import com.alex.myexpenses.service.expense.demo.ExpenseListDemoService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +28,12 @@ public class ExpenseListDemoController {
     private ExpenseListDemoService demoService;
 
     @PostMapping
-    public ResponseEntity<ExpenseListDTO> createList(@RequestBody ExpenseListDTO dto) {
+    public ResponseEntity<ExpenseListDetailDTO> createList(@RequestBody ExpenseListDetailDTO dto) {
         return new ResponseEntity<>(demoService.createExpenseList(dto), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<ExpenseListDTO>> getAllLists() {
+    public ResponseEntity<List<ExpenseListDetailDTO>> getAllLists() {
         return ResponseEntity.ok(demoService.getAll());
     }
 
@@ -43,13 +43,13 @@ public class ExpenseListDemoController {
     }
 
     @PostMapping("/{listId}/expenses")
-    public ResponseEntity<ExpenseDTO> addExpense(@PathVariable Long listId, @RequestBody ExpenseDTO dto) {
+    public ResponseEntity<ExpenseDetailDTO> addExpense(@PathVariable Long listId, @RequestBody ExpenseDetailDTO dto) {
         dto.setExpenseListId(listId);
         return new ResponseEntity<>(demoService.addExpense(dto), HttpStatus.CREATED);
     }
 
     @GetMapping("/{listId}/expenses")
-    public ResponseEntity<ExpenseListDTO> getExpenses(@PathVariable Long listId) {
+    public ResponseEntity<ExpenseListDetailDTO> getExpenses(@PathVariable Long listId) {
         return ResponseEntity.ok(demoService.getExpenseListById(listId));
     }
 

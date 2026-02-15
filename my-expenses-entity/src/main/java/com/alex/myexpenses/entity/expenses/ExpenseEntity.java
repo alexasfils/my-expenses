@@ -2,6 +2,7 @@ package com.alex.myexpenses.entity.expenses;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,25 +13,28 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.alex.myexpenses.entity.shared.BaseEntity;
+import com.alex.myexpenses.entity.user.UserEntity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "expenses")
-@Data
-@NoArgsConstructor
-public class ExpenseEntity implements Serializable {
+@Getter 
+@Setter
+@NoArgsConstructor 
+@AllArgsConstructor
+public class ExpenseEntity extends BaseEntity implements Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6626933298806944820L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private Long id;
-
+	
 	@Column(name = "name", length = 100, nullable = false)
 	private String name;
 	
@@ -50,5 +54,20 @@ public class ExpenseEntity implements Serializable {
 	@ManyToOne
     @JoinColumn(name = "id_category", nullable = false)
 	private CategoryEntity category;
+	
+	@Override
+	public boolean equals(Object o) {
+	    if (this == o) return true;
+	    if (o == null || getClass() != o.getClass()) return false;
+	    
+	    ExpenseEntity that = (ExpenseEntity) o;
+	    
+	    return getId() != null && getId().equals(that.getId());
+	}
+	
+	@Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 
 }

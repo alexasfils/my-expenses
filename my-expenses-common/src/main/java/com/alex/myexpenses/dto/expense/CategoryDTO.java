@@ -1,7 +1,7 @@
 package com.alex.myexpenses.dto.expense;
 
-import java.util.List;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
@@ -13,15 +13,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CategoryDTO {
 	
+	@NotNull(message = "Id is required for update")
 	private Long id;
+	
 	@NotNull(message = "Name informations cannot be null")
+	@NotBlank(message = "Name cannot be empty") // Meglio di NotNull per le stringhe
 	private String name;
 	
 	private String color;
-	@NotNull(message = "Isdefault informations cannot be null")
-	private Boolean isdefault = false;
-//	private Long userId;
-	
-	private List<ExpenseDTO> expenses;
-
 }
