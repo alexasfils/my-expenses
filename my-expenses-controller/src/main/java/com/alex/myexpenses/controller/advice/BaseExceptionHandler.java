@@ -147,6 +147,17 @@ public class BaseExceptionHandler {
     	return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
     }
     
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorDTO> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request){
+    	log.warn("Business rule violation: {}", ex.getMessage());
+    	ErrorDTO errorDetails = new ErrorDTO(
+                HttpStatus.CONFLICT,
+                ex.getMessage(),
+                request.getRequestURI()
+            );
+    	return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+    }
+    
     /**
      * Handles BadRequestException.
      * This exception is typically thrown when the client sends invalid input.
